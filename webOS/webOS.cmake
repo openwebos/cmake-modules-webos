@@ -227,24 +227,29 @@ macro(webos_modules_init major minor patch)
 		set(WEBOS_PROJECT_SUMMARY "(unknown)")
 	endif()
 
-	# Set up PKG_CONFIG_PATH to look first in the (potentially) overridden installation location and then in both of our
-	# default installation locations before searching in the standard locations. (That pkg-config does this has been
-	# confirmed in spite of its man page implying that it does something else.) usr/lib/pkgconfig must be searched as well as
-	# usr/share/pkgconfig as not all FOSS components have been updated for the new convention; pkg-config's practice of
-	# searching usr/lib/pkgconfig before usr/share/pkgconfig is followed, even though it seems wrong. Note that duplication in
-	# the parameter list of webos_append_new_to_list() is safe (so it doesn't matter if WEBOS_INSTALL_ROOT is set to either
-	# /usr/local/webos or /opt/webos).
-	set (_pkgconfigpath $ENV{PKG_CONFIG_PATH})
-	string(REGEX REPLACE ":" ";" _pkgconfigpath "${_pkgconfigpath}")
-	webos_append_new_to_list(_pkgconfigpath ${WEBOS_INSTALL_LIBDIR}/pkgconfig
-	                                        ${WEBOS_INSTALL_PKGCONFIGDIR}
-	                                        /usr/local/webos/usr/lib/pkgconfig
-	                                        /usr/local/webos/usr/share/pkgconfig
-	                                        /opt/webos/usr/lib/pkgconfig
-	                                        /opt/webos/usr/share/pkgconfig)
-	string(REGEX REPLACE ";" ":" _pkgconfigpath "${_pkgconfigpath}")
-	set(ENV{PKG_CONFIG_PATH} "${_pkgconfigpath}")
-	unset(_pkgconfigpath)
+	# When being run under OE, assume it has set PKG_CONFIG_PATH correctly and don't touch it here. CMAKE_FIND_ROOT_PATH is
+	# only meant to be set when cross-compiling, so its absence is an appropriate way to detect when we should append to
+	# PKG_CONFIG_PATH.
+	if(NOT DEFINED CMAKE_FIND_ROOT_PATH)
+		# Set up PKG_CONFIG_PATH to look first in the (potentially) overridden installation location and then in both of
+		# our default installation locations before searching in the standard locations. (That pkg-config does this has
+		# been confirmed in spite of its man page implying that it does something else.) usr/lib/pkgconfig must be searched
+		# as well as usr/share/pkgconfig as not all FOSS components have been updated for the new convention; pkg-config's
+		# practice of searching usr/lib/pkgconfig before usr/share/pkgconfig is followed, even though it seems wrong. Note
+		# that duplication in the parameter list of webos_append_new_to_list() is safe (so it doesn't matter if
+		# WEBOS_INSTALL_ROOT is set to either /usr/local/webos or /opt/webos).
+		set(_pkgconfigpath $ENV{PKG_CONFIG_PATH})
+		string(REGEX REPLACE ":" ";" _pkgconfigpath "${_pkgconfigpath}")
+		webos_append_new_to_list(_pkgconfigpath ${WEBOS_INSTALL_LIBDIR}/pkgconfig
+		                                        ${WEBOS_INSTALL_PKGCONFIGDIR}
+		                                        /usr/local/webos/usr/lib/pkgconfig
+		                                        /usr/local/webos/usr/share/pkgconfig
+		                                        /opt/webos/usr/lib/pkgconfig
+		                                        /opt/webos/usr/share/pkgconfig)
+		string(REGEX REPLACE ";" ":" _pkgconfigpath "${_pkgconfigpath}")
+		set(ENV{PKG_CONFIG_PATH} "${_pkgconfigpath}")
+		unset(_pkgconfigpath)
+	endif()
 
 	message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 	message(STATUS "ENV{PKG_CONFIG_PATH}: $ENV{PKG_CONFIG_PATH}")
