@@ -290,7 +290,7 @@ macro(_webos_init_install_vars)
 	# Base paths (on root filesystem)
 	_webos_set_from_env(WEBOS_INSTALL_BASE_BINDIR        base_bindir              ${WEBOS_INSTALL_ROOT}/bin)
 	_webos_set_from_env(WEBOS_INSTALL_BASE_SBINDIR       base_sbindir             ${WEBOS_INSTALL_ROOT}/sbin)
-	_webos_set_from_env(WEBOS_INSTALL_BASE_LIBDIR        base_bindir              ${WEBOS_INSTALL_ROOT}/lib${LIB_SUFFIX})
+	_webos_set_from_env(WEBOS_INSTALL_BASE_LIBDIR        base_libdir              ${WEBOS_INSTALL_ROOT}/lib${LIB_SUFFIX})
 
 	# Architecture independent paths
 	_webos_set_from_env(WEBOS_INSTALL_DATADIR            datadir                  ${WEBOS_INSTALL_PREFIX}/share)
