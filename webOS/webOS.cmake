@@ -5,13 +5,13 @@
 #
 # Usage:
 #  include(webOS/webOS)
-#  webos_modules_init(1 0 0 QUALIFIER RC3)
+#  webos_modules_init(1 0 0 QUALIFIER RC4)
 #
 # Detailed documentation for the latest version is available from:
 # https://github.com/openwebos/cmake-modules-webos/blob/master/REFERENCE.md
 #
 # @@@VERSION
-# 1.0.0 RC3
+# 1.0.0 RC4
 # VERSION@@@
 #
 
@@ -746,34 +746,32 @@ function(webos_build_nodejs_module)
 	install(TARGETS ${webos_nodejs_module_NAME}.node DESTINATION ${WEBOS_INSTALL_LIBDIR}/nodejs ${permissions})
 endfunction()
 
-# Usage: webos_config_build_doxygen(<doc-dir> <doxyfile>)
-#
-# Adds a "docs" make target that builds HTML Doxygen documentation using <doxyfile> having first done a configure_file() on
-# <doxyfile>.in .
-#
-# If <doc-dir> is relative, CMAKE_SOURCE_DIR is prepended.
-#
-# If WEBOS_CONFIG_BUILD_DOCS is set, adds the custom target as a dependency of "make all" and arranges for "make install" to
-# install what's generated.
-#
-# TODO: support multiple <doxyfile>-s (model after nyx-lib/src/doc/CMakeLists.txt)
-# TODO: fail gracefully if doxygen and dot (from graphviz) are not installed
-function(webos_config_build_doxygen doc_dir doxyfile)
-	set(outdir ${WEBOS_BINARY_DOCUMENTATION_DIR}/${CMAKE_PROJECT_NAME})
 
-	message(STATUS "Adding \"docs\" make target to build configured ${doc_dir}/${doxyfile}.in")
-	if(WEBOS_CONFIG_BUILD_DOCS)
-		message(STATUS "Making \"make docs\" a dependency of \"make all\"")
-		set(all_flag "ALL")
-	else()
-		message(STATUS "Output will be written to ${outdir}")
-		set(all_flag "")
-	endif()
-
+# Usage: _webos_add_doc_target(<doc_dir> <doxyfile> [basename])
+#
+# Add a new doc target for the given doxyfile
+#
+# The optional argument basename needs to be passed in case of
+# multiple doxygen files
+ 
+function(_webos_add_doc_target doc_dir doxyfile)
 	webos_make_source_path_absolute(doc_dir ${CMAKE_SOURCE_DIR}/doc TRUE)
 	file(RELATIVE_PATH doc_reldir ${CMAKE_SOURCE_DIR} ${doc_dir})
 
-	# Create the doxygen input file with the correct path
+	unset(basename)
+	unset(all_flag)
+	if(${ARGC} EQUAL 2)
+		set(target docs)
+		if(WEBOS_CONFIG_BUILD_DOCS)
+			set(all_flag ALL)
+		endif()
+	else()
+		set(basename ${ARGV2})
+		set(target docs-${basename})
+	endif()
+
+	set(outdir ${WEBOS_BINARY_DOCUMENTATION_DIR}/${CMAKE_PROJECT_NAME}/${basename})
+
 	set(configuredfile ${WEBOS_BINARY_CONFIGURED_DIR}/${doc_reldir}/${doxyfile})
 	configure_file(${doc_dir}/${doxyfile}.in ${configuredfile} @ONLY)
 
@@ -785,12 +783,72 @@ function(webos_config_build_doxygen doc_dir doxyfile)
 	# subdirectory of it).
 	file(APPEND ${configuredfile} "EXCLUDE = ${CMAKE_BINARY_DIR}\n")
 
-	add_custom_target(docs ${all_flag}
+	add_custom_target(${target} ${all_flag}
 	                  COMMAND mkdir -p ${outdir}
 	                  COMMAND cd ${outdir}
 	                  COMMAND doxygen ${configuredfile}
 	                  SOURCES ${doc_dir}/${doxyfile}.in
-	                  COMMENT "Generating Doxygen documentation")
+	                  COMMENT "Generating ${basename} Doxygen documentation")
+
+	if(${ARGC} GREATER 2)
+		add_dependencies(docs ${target})
+	endif()
+endfunction()
+
+# Usage: webos_config_build_doxygen(<doc-dir> <doxyfile> ...)
+#
+# Adds a "docs" make target that builds HTML Doxygen documentation having first done a configure_file() on 
+# <doxyfile>.in. Multiple <doxyfile> arguments can be specified.
+#
+# If <doc-dir> is relative, CMAKE_SOURCE_DIR is prepended.
+#
+# If WEBOS_CONFIG_BUILD_DOCS is set, adds the custom target as a dependency of "make all" and arranges for "make install" to
+# install what's generated.
+#
+
+function(webos_config_build_doxygen doc_dir)
+	if(${ARGC} EQUAL 2)
+		set(single_doxyfile TRUE)
+	elseif(${ARGC} LESS 2)
+		message(FATAL_ERROR "webos_config_build_doxygen(): Invalid argument list: '${ARGN}'")
+	endif()
+
+	set(outdir ${WEBOS_BINARY_DOCUMENTATION_DIR}/${CMAKE_PROJECT_NAME})
+
+	message(STATUS "Adding \"docs\" make target to build configured ${doc_dir}/${doxyfile}.in")
+	if(WEBOS_CONFIG_BUILD_DOCS)
+		message(STATUS "Making \"make docs\" a dependency of \"make all\"")
+		set(all_flag ALL)
+	
+		find_program(DOXYGEN_EXECUTABLE NAMES doxygen DOC "doxygen executable")
+		find_program(DOT_EXECUTABLE NAMES dot DOC "dot executable")
+		if(NOT (DOXYGEN_EXECUTABLE OR DOT_EXECUTABLE))
+			message(FATAL_ERROR "In order to generate documentation, please install 'doxygen' and 'graphviz'")
+		elseif(NOT DOXYGEN_EXECUTABLE)
+			message(FATAL_ERROR "In order to generate documentation, please install 'doxygen'")
+		elseif(NOT DOT_EXECUTABLE)
+			message(FATAL_ERROR "In order to generate documentation, please install 'graphviz'")
+		endif()
+	else()
+		message(STATUS "Output will be written to ${outdir}")
+		set(all_flag "")
+	endif()
+
+	if(NOT single_doxyfile)
+		add_custom_target(docs ${all_flag})
+	endif()
+	
+	webos_make_source_path_absolute(doc_dir ${CMAKE_SOURCE_DIR}/doc TRUE)
+	file(RELATIVE_PATH doc_reldir ${CMAKE_SOURCE_DIR} ${doc_dir})
+
+	foreach(file ${ARGN})
+		if(single_doxyfile)
+			unset(basename)
+		else()
+			get_filename_component(basename ${file} NAME_WE)
+		endif()
+		_webos_add_doc_target(${doc_dir} ${file} ${basename})
+	endforeach()
 
 	if(WEBOS_CONFIG_BUILD_DOCS)
 		install(DIRECTORY ${outdir} DESTINATION ${WEBOS_INSTALL_DOCDIR})
@@ -798,8 +856,6 @@ function(webos_config_build_doxygen doc_dir doxyfile)
 	else()
 		message(STATUS "Adding \"install-docs\" make target to install ${outdir}")
 
-		# Need to CD into the working directory rather than specify it as we create
-		# the directory within the target.
 		# The 'chmod' is to emulate the permissions set by the cmake install(DIRECTORY ...) command
 		add_custom_target(install-docs
 		                  COMMAND mkdir -p ${WEBOS_INSTALL_DOCDIR}
@@ -807,7 +863,8 @@ function(webos_config_build_doxygen doc_dir doxyfile)
 		                  COMMAND chmod -R u=rwX,g=rX,o=rX ${WEBOS_INSTALL_DOCDIR}/${CMAKE_PROJECT_NAME}
 		                  DEPENDS docs
 		                  COMMENT "Installing Doxygen documentation to ${WEBOS_INSTALL_DOCDIR}/${CMAKE_PROJECT_NAME}")
-	endif()
+		endif()
+
 endfunction()
 
 
