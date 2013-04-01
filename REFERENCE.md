@@ -581,7 +581,7 @@ _luna-service2_ bus.
 
 Any project which provides a _luna-service2_ interface is required to install
 files to expose and describe that interface. This function installs those files.
-Given that these files also often contain system paths, they are configured
+Given that these files also often contain system paths, they may be configured
 before being installed. The configured files can be inspected under the
 `Configured/files/sysbus` subdirectory tree of the build directory.
 
@@ -594,8 +594,20 @@ will be configured and installed as shown below.
     *.json.pub.in       WEBOS_INSTALL_SYSBUS_PUBROLESDIR
     *.json.prv.in       WEBOS_INSTALL_SYSBUS_PRVROLESDIR
 
-No other files will be installed or configured. The last two fields of the
-input file names (i.e. `.pub.in` and `.prv.in`) are removed from the names of
+No other files will be configured. The last two fields of the input file names
+(i.e. `.pub.in` and `.prv.in`) are removed from the names of the installed files.
+
+All files in the provided directory which match one of the following patterns
+will be installed, without being configured, as shown below.
+
+    Pattern             Installed in
+    *.service.pub       WEBOS_INSTALL_SYSBUS_PUBSERVICESDIR
+    *.service.prv       WEBOS_INSTALL_SYSBUS_PRVSERVICESDIR
+    *.json.pub          WEBOS_INSTALL_SYSBUS_PUBROLESDIR
+    *.json.prv          WEBOS_INSTALL_SYSBUS_PRVROLESDIR
+
+No other files will be installed without being configured. The last field of
+the input file names (i.e. `.pub` and `.prv`) are removed from the names of
 the installed files.
 
 ###webos_component

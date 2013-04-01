@@ -1068,6 +1068,7 @@ endfunction()
 
 function(_webos_install_system_bus_files source_path ftype visibility dest_path)
 
+	# First configure and install all *.in files
 	file(GLOB filelist ${source_path}/*.${ftype}.${visibility}.in)
 
 	foreach(sysfile ${filelist})
@@ -1080,6 +1081,17 @@ function(_webos_install_system_bus_files source_path ftype visibility dest_path)
 		configure_file(${sysfile} ${configured_file})
 #		message(STATUS "${configured_file} will be installed to ${WEBOS_INSTALL_SYSBUS_${dest_path}}/${destfile}")
 		install(FILES ${configured_file} DESTINATION ${WEBOS_INSTALL_SYSBUS_${dest_path}} RENAME ${destfile})
+	endforeach()
+
+	# Next, install any files not requiring configuration
+	file(GLOB filelist ${source_path}/*.${ftype}.${visibility})
+
+	foreach(sysfile ${filelist})
+		# Remove the visibility component of the filename
+		string(REGEX REPLACE "\\.${visibility}$" "" destfile ${sysfile})
+		get_filename_component(destfile ${destfile} NAME)
+		# Install the file, renaming it to remove the visibility component
+		install(FILES ${sysfile} DESTINATION ${WEBOS_INSTALL_SYSBUS_${dest_path}} RENAME ${destfile})
 	endforeach()
 endfunction()
 
