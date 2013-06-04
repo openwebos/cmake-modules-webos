@@ -307,6 +307,12 @@ Configures and installs the UPSTART file for a daemon.
 - Specify `RESTRICTED_PERMISSIONS` to restrict access to `OWNER` only. Otherwise
   `READ` and `EXECUTE` access will also be granted to `WORLD` and `GROUP`.
 
+`webos_build_daemon()` supports both the original Upstart v0.3 files and Upstart
+v1.8. Files with a name of the form `*.conf.in` will be configured and installed
+to the Open webOS equivalent of `/etc/init`, which is where Upstart v1.8 expects
+to find them. Other files with a suffix of `.in` will be installed into the
+equivalent of `/etc/event.d`. Both sets of files will be installed.
+
 Note that calling `webos_build_daemon()` does not relieve you of the need to
 include a CMake `add_executable()` command. Also, note that `add_executable()`
 must be invoked before `webos_build_daemon()` (in order to define the target).
@@ -321,7 +327,7 @@ For example
 
 Will install the executable created by `make mydaemon` into the
 `WEBOS_INSTALL_BINDIR` location. It will also configure and install the UPSTART
-script `files/launch/mydaemon.in`.
+scripts `files/launch/mydaemon.in` and `files/launch/mydaemon.conf.in`.
 
 ###webos_build_db8_files
 Install all _kinds_ and _permissions_ files associated with _db8_.

@@ -597,32 +597,55 @@ endfunction()
 # under it are configured and installed (without the .in suffix) under Upstart conf directory. Otherwise, the file
 # <path-to-basename>.in is configured and the resulting <path-to-basename> installed in the Upstart conf directory.
 # <path-to-basename-or-dirname> defaults to files/launch/<name>.
+#
+# Only files with a .in suffix will be installed.
+# Files with the dual .conf.in suffix, intended for use with Upstart 1.8 or later, will be installed under SYSCONFDIR/init
+#
 function(webos_build_daemon)
-	cmake_parse_arguments(webos_daemon "ROOTFS;RESTRICTED_PERMISSIONS" "NAME;LAUNCH" "" ${ARGN})
-	if(DEFINED webos_daemon_UNPARSED_ARGUMENTS)
-		message(FATAL_ERROR "webos_build_daemon(): Unrecognized arguments: '${webos_daemon_UNPARSED_ARGUMENTS}'")
-	endif()
+    cmake_parse_arguments(webos_daemon "ROOTFS;RESTRICTED_PERMISSIONS" "NAME;LAUNCH" "" ${ARGN})
+    if(DEFINED webos_daemon_UNPARSED_ARGUMENTS)
+        message(FATAL_ERROR "webos_build_daemon(): Unrecognized arguments: '${webos_daemon_UNPARSED_ARGUMENTS}'")
+    endif()
 
-	if(NOT DEFINED webos_daemon_NAME)
-		set(webos_daemon_NAME ${CMAKE_PROJECT_NAME})
-	endif()
+    if(NOT DEFINED webos_daemon_NAME)
+        set(webos_daemon_NAME ${CMAKE_PROJECT_NAME})
+    endif()
 
-	# if(IS_DIRECTORY ...) needs a full path
-	webos_make_source_path_absolute(webos_daemon_LAUNCH files/launch/${webos_daemon_NAME} TRUE)
+    # if(IS_DIRECTORY ...) needs a full path
+    webos_make_source_path_absolute(webos_daemon_LAUNCH files/launch/${webos_daemon_NAME} TRUE)
 
-	_webos_set_bin_inst_dir(destdir TRUE ${webos_daemon_ROOTFS})
-	_webos_set_bin_permissions(permissions ${webos_daemon_RESTRICTED_PERMISSIONS})
+    _webos_set_bin_inst_dir(destdir TRUE ${webos_daemon_ROOTFS})
+    _webos_set_bin_permissions(permissions ${webos_daemon_RESTRICTED_PERMISSIONS})
 
-	# XXX powerd had this -- is it necessary?
-	# set_property(TARGET ${webos_daemon_NAME} PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
+    # XXX powerd had this -- is it necessary?
+    # set_property(TARGET ${webos_daemon_NAME} PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-	install(TARGETS ${webos_daemon_NAME} DESTINATION ${destdir} ${permissions})
+    install(TARGETS ${webos_daemon_NAME} DESTINATION ${destdir} ${permissions})
 
-	if(IS_DIRECTORY ${webos_daemon_LAUNCH})
-		webos_build_configured_tree(${webos_daemon_LAUNCH} UPSTARTCONFDIR)
-	else()
-		webos_build_configured_file(${webos_daemon_LAUNCH} UPSTARTCONFDIR "")
-	endif()
+    if(IS_DIRECTORY ${webos_daemon_LAUNCH})
+        file(GLOB_RECURSE src_absfiles ${webos_daemon_LAUNCH}/*.in)
+    else()
+        set(src_absfiles "")
+        if(EXISTS ${webos_daemon_LAUNCH}.in)
+            set(src_absfiles ${webos_daemon_LAUNCH}.in)
+        endif()
+        if(EXISTS ${webos_daemon_LAUNCH}.conf.in)
+            set(src_absfiles ${src_absfiles} ${webos_daemon_LAUNCH}.conf.in)
+        endif()
+    endif()
+
+    if("${src_absfiles}" STREQUAL "")
+        message(FATAL_ERROR "webos_build_daemon(): No .in files found under '${webos_daemon_LAUNCH}'")
+    endif()
+
+    foreach(file ${src_absfiles})
+        string(REGEX REPLACE "\\.in$" "" file_noext ${file})
+        if (${file} MATCHES ".*\\.conf\\.in$")
+            webos_build_configured_file(${file_noext} SYSCONFDIR "init")
+        else()
+            webos_build_configured_file(${file_noext} SYSCONFDIR "event.d")
+        endif()
+    endforeach()
 endfunction()
 
 
