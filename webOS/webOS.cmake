@@ -1216,3 +1216,20 @@ function(webos_configure_header_files headers_tree)
 	set(dest_abstree ${WEBOS_BINARY_CONFIGURED_DIR}/${dest_reltree})
 	include_directories(BEFORE ${dest_abstree})
 endfunction()
+
+# Usage: webos_enable_gtest()
+#
+# Searches for gtest source code, and builds it as a subproject. The compiled files are placed
+# in the directory ${CMAKE_CURRENT_BINARY_DIR}/webos-gtest-build.
+# The function should be called once per project from the topmost directory, which uses gtest.
+#
+# Sets variable GTEST_LIBRARIES, which can be added to target_link_libraries().
+function(webos_enable_gtest)
+	find_path(GTEST_SRC CMakeLists.txt PATHS /usr/src/gtest ONLY_CMAKE_FIND_ROOT_PATH)
+	if(${GTEST_SRC} STREQUAL "GTEST_SRC-NOTFOUND")
+		message(FATAL_ERROR "Cannot find gtest source code in /usr/src")
+	endif()
+
+	add_subdirectory(${GTEST_SRC} webos-gtest-build EXCLUDE_FROM_ALL)
+	set(GTEST_LIBRARIES gtest gtest_main PARENT_SCOPE)
+endfunction()
