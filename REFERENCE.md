@@ -796,6 +796,36 @@ allowing conditional code such as
 `WEBOS_TARGET_CORE_OS` can also be used to conditionalize actions within the
 CMake script itself, by testing it with `STREQUAL`.
 
+###webos_include_install_paths
+Create a header file containing all #defines for WEBOS_INSTALL_* variables and
+force it to be included by all C and C++ source files.
+
+A simple alternative to using `webos_configure_source_files()` to configure
+paths in source code is to add a `-DVAR="path"` command line compiler flag 
+and reference the variable in the source code. For example, instead of:
+
+    fd = open("@WEBOS_INSTALL_SYSCONDIR@/myfile.conf", "r")
+
+script authors often do this in their CMake script
+
+    webos_add_compiler_flag(ALL -DMYCONFPATH="${WEBOS_INSTALL_SYSCONFDIR}")
+
+and this in their source file
+
+    fd = open(MYCONFPATH "/myfile.conf", "r")
+
+which avoids needing to use `webos_configure_source_files()`.
+
+To facilitate this idiom, the `webos_include_install_paths()` function creates
+a header file `webospaths.h` under `WEBOS_BINARY_CONFIGURED_DIR` and then adds
+the flag `-include WEBOS_BINARY_CONFIGURED_DIR/webos_paths.h` to all compiles.
+As a result, all source files in a component using this function gain defined
+constants for all system installation paths.
+ 
+Thus the last line above simply becomes
+
+    fd = open(WEBOS_INSTALL_SYSCONFDIR "/myfile.conf", "r")
+
 ###webos_install_symlink
 Install a **symbolic** link during `make install`.
 

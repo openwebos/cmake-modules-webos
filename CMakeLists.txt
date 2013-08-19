@@ -70,3 +70,6 @@ install(FILES REFERENCE.md DESTINATION ${CMAKE_ROOT}/Modules/webOS)
 #webos_machine_impl_dep()
 
 #webos_install_symlink(cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} ${WEBOS_INSTALL_DATADIR}/cmake)
+
+#webos_include_install_paths()
+
