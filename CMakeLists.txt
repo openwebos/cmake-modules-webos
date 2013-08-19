@@ -29,7 +29,7 @@ project(cmake-modules-webos NONE)
 # Make sure we use ourself to build ourself
 include(${CMAKE_SOURCE_DIR}/webOS/webOS.cmake)
 
-set(VERSION_ARGS 1 0 0 QUALIFIER RC4)
+set(VERSION_ARGS 1 0 0 QUALIFIER RC5)
 webos_modules_init(${VERSION_ARGS})
 webos_component(${VERSION_ARGS})
 

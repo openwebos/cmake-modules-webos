@@ -61,7 +61,7 @@ The first five (executable) lines of your top level `CMakeLists.txt` script
 	project(<name> <lang> [<lang> ...])
 
 	include(webOS/webOS)
-	webos_modules_init(1 0 0 QUALIFIER RC4)
+	webos_modules_init(1 0 0 QUALIFIER RC5)
 	webos_component(<major> <minor> <patch> \[QUALIFIER <value>>])
 
 In order, these lines: specify the version of Cmake that you are using to write
@@ -337,7 +337,7 @@ Install all _kinds_ and _permissions_ files associated with _db8_.
 - `<path-to-db-tree>` provides a path to a directory which contains two further
   subdirectories: `permissions` and `kinds`. The function installs every file
   matching the pattern "com.*" within these subdirectories into
-  `WEBOS_INSTALL_WEBOS_SYSCONFDIR/db/kinds` and
+  `WEBOS_INSTALL_WEBOS_SYSCONFDIR/db/permissions` and
   `WEBOS_INSTALL_WEBOS_SYSCONFDIR/db/kinds` respectively.
 
   If it is not provided, `<path-to-db-tree>` defaults to `files/db8`.
@@ -1070,6 +1070,24 @@ will not have anything appended. That is, it will have the same value as
 
 As with `webos_component()` the calculated value of `WEBOS_COMPONENT_VERSION` is
 compared to any value of `WEBOS_COMPONENT_VERSION` passed in from the command line.
+
+###webos_use_gtest
+Search for the source code of the Google Test framework, and add it as a
+subproject excluded from the `all` target.
+
+    webos_use_gtest()
+
+This function is called to use the Google Test framework for a webOS component.
+It searches for the source code of the library `gtest` under the directory
+`WEBOS_INSTALL_SRCDIR`. The compiled libraries are placed in the directory
+`WEBOS_BINARY_IMPORTED_DIR/gtest`. The variable `WEBOS_GTEST_LIBRARIES` is
+exported, which can be added to `target_link_libraries()`.
+
+This function should be called once per project from the topmost directory.
+
+Note that compiling gtest from source is the recommended way to use it, as
+explained
+[here](https://groups.google.com/d/msg/googletestframework/Zo7_HOv1MJ0/F4ZBGjh_ePcJ).
 
 WEBOS_INSTALL Variables
 -----------------------

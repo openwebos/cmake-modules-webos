@@ -5,13 +5,13 @@
 #
 # Usage:
 #  include(webOS/webOS)
-#  webos_modules_init(1 0 0 QUALIFIER RC4)
+#  webos_modules_init(1 0 0 QUALIFIER RC5)
 #
 # Detailed documentation for the latest version is available from:
 # https://github.com/openwebos/cmake-modules-webos/blob/master/REFERENCE.md
 #
 # @@@VERSION
-# 1.0.0 RC4
+# 1.0.0 RC5
 # VERSION@@@
 #
 
@@ -54,6 +54,7 @@
 # WEBOS_BINARY_CONFIGURED_DIR - tree under which files processed by configure_file() are placed (its layout mirrors that of
 #                               CMAKE_SOURCE_DIR)
 # WEBOS_BINARY_DOCUMENTATION_DIR - tree under which results of running Doxygen are placed
+# WEBOS_BINARY_IMPORTED_DIR - tree under which built files of imported projects are placed
 # WEBOS_COMPONENT_VERSION   - the full version string
 # WEBOS_API_VERSION         - just <major>.<minor>.<patch> (no <qualifier>) or <upstream-version>
 # WEBOS_API_VERSION_MAJOR   - just <major> or first version field extracted from <upstream-version>
@@ -74,6 +75,7 @@ include(CMakeParseArguments)
 # XXX Make const
 set(WEBOS_BINARY_CONFIGURED_DIR ${CMAKE_BINARY_DIR}/Configured)
 set(WEBOS_BINARY_DOCUMENTATION_DIR ${CMAKE_BINARY_DIR}/Documentation)
+set(WEBOS_BINARY_IMPORTED_DIR ${CMAKE_BINARY_DIR}/Imported)
 
 # Usage: webos_append_new_to_list(<list-variable-name> <item> ...)
 #
@@ -1272,4 +1274,26 @@ function(webos_configure_header_files headers_tree)
 	file(RELATIVE_PATH dest_reltree ${CMAKE_SOURCE_DIR} ${headers_tree})
 	set(dest_abstree ${WEBOS_BINARY_CONFIGURED_DIR}/${dest_reltree})
 	include_directories(BEFORE ${dest_abstree})
+endfunction()
+
+
+# Usage: webos_use_gtest()
+#
+# Searches for gtest source code, and configures it as a subproject excluded from the "all" target. The compiled libraries are
+# placed in the directory WEBOS_BINARY_IMPORTED_DIR/gtest. This function should be called once per project from the topmost
+# directory.
+#
+# Exports the variable WEBOS_GTEST_LIBRARIES, which can be added to target_link_libraries().
+#
+# Note that compiling gtest from source is the recommended way to use it, as explained here: 
+# https://groups.google.com/d/msg/googletestframework/Zo7_HOv1MJ0/F4ZBGjh_ePcJ .
+
+function(webos_use_gtest)
+	find_path(gtest_src CMakeLists.txt PATHS ${WEBOS_INSTALL_SRCDIR}/gtest ONLY_CMAKE_FIND_ROOT_PATH)
+	if(${gtest_src} STREQUAL gtest_src-NOTFOUND)
+		message(FATAL_ERROR "Cannot find gtest source code in ${WEBOS_INSTALL_SRCDIR}")
+	endif()
+
+	add_subdirectory(${gtest_src} ${WEBOS_BINARY_IMPORTED_DIR}/gtest EXCLUDE_FROM_ALL)
+	set(WEBOS_GTEST_LIBRARIES gtest gtest_main PARENT_SCOPE)
 endfunction()
