@@ -282,6 +282,10 @@ endmacro()
 # TODO: Multi-arch support: just set LIB_SUFFIX to be /<multi-arch-tuple> ? (XXX LIB_SUFFIX is not a standard CMAKE variable, but
 # appears to be commonly used.)
 macro(_webos_init_install_vars)
+	#
+	# Standard OE variables for various locations
+	#
+
 	# Path prefixes
 	_webos_set_from_env(WEBOS_INSTALL_ROOT               base_prefix             "${WEBOS_INSTALL_ROOT}")  # WEBOS_INSTALL_ROOT can be empty
 	_webos_set_from_env(WEBOS_INSTALL_PREFIX             prefix                   ${WEBOS_INSTALL_ROOT}/usr)
@@ -311,28 +315,61 @@ macro(_webos_init_install_vars)
 	# Leave this one out until we come across a need for it.
 	# _webos_set_from_env(WEBOS_INSTALL_OLDINCLUDEDIR    oldincludedir            ${WEBOS_INSTALL_EXEC_PREFIX}/include)
 
-	# Variables invented by us for other standard locations
+
+	#
+	# OE variables invented by webOS for other standard locations
+	#
+
 	_webos_set_from_env(WEBOS_INSTALL_BOOTDIR            webos_bootdir            ${WEBOS_INSTALL_ROOT}/boot)
+	_webos_set_from_env(WEBOS_INSTALL_BROWSERPLUGINSDIR  webos_browserpluginsdir  ${WEBOS_INSTALL_LIBDIR}/BrowserPlugins)
 	_webos_set_from_env(WEBOS_INSTALL_DEFAULTCONFDIR     webos_defaultconfdir     ${WEBOS_INSTALL_SYSCONFDIR}/default)
 	_webos_set_from_env(WEBOS_INSTALL_EXECSTATEDIR       webos_execstatedir       ${WEBOS_INSTALL_LOCALSTATEDIR}/lib)
+	_webos_set_from_env(WEBOS_INSTALL_FIRMWAREDIR        webos_firmwaredir        ${WEBOS_INSTALL_BASE_LIBDIR}/firmware)
 	_webos_set_from_env(WEBOS_INSTALL_HOMEDIR            webos_homedir            ${WEBOS_INSTALL_ROOT}/home)
+	_webos_set_from_env(WEBOS_INSTALL_LOGDIR             webos_logdir             ${WEBOS_INSTALL_LOCALSTATEDIR}/log)
 	_webos_set_from_env(WEBOS_INSTALL_MEDIADIR           webos_mediadir           ${WEBOS_INSTALL_ROOT}/media)
 	_webos_set_from_env(WEBOS_INSTALL_MNTDIR             webos_mntdir             ${WEBOS_INSTALL_ROOT}/mnt)
 	_webos_set_from_env(WEBOS_INSTALL_LOGDIR             webos_logdir             ${WEBOS_INSTALL_LOCALSTATEDIR}/log)
 	# Use the correct tree for architecture independent files (which is supported by modern versions of pkg-config)
 	_webos_set_from_env(WEBOS_INSTALL_PKGCONFIGDIR       webos_pkgconfigdir       ${WEBOS_INSTALL_DATADIR}/pkgconfig)
 	_webos_set_from_env(WEBOS_INSTALL_PRESERVEDTMPDIR    webos_preservedtmpdir    ${WEBOS_INSTALL_LOCALSTATEDIR}/tmp)
+        # Having a Qt plugins directory is standard, but the value used by Open webOS isn't
+	_webos_set_from_env(WEBOS_INSTALL_QTPLUGINSDIR       webos_qtpluginsdir       ${WEBOS_INSTALL_PREFIX}/plugins)
 	_webos_set_from_env(WEBOS_INSTALL_RUNTIMEINFODIR     webos_runtimeinfodir     ${WEBOS_INSTALL_LOCALSTATEDIR}/run)
+	_webos_set_from_env(WEBOS_INSTALL_SRCDIR             webos_srcdir             ${WEBOS_INSTALL_PREFIX}/src)
+	_webos_set_from_env(WEBOS_INSTALL_UDEVSCRIPTSDIR     webos_udevscriptsdir     ${WEBOS_INSTALL_BASE_LIBDIR}/udev)
 	# This one will eventually default to ${WEBOS_INSTALL_SYSCONFDIR}/init
 	_webos_set_from_env(WEBOS_INSTALL_UPSTARTCONFDIR     webos_upstartconfdir     ${WEBOS_INSTALL_SYSCONFDIR}/event.d)
 
-	# Variables for webOS additions to the FS hierarchy
-	_webos_set_from_env(WEBOS_INSTALL_CRYPTOFSDIR        webos_cryptofsdir        ${WEBOS_INSTALL_MEDIADIR}/cryptofs)
-	_webos_set_from_env(WEBOS_INSTALL_BROWSERSTORAGEDIR  webos_browserstoragedir  ${WEBOS_INSTALL_CRYPTOFSDIR}/.browser)
-	_webos_set_from_env(WEBOS_INSTALL_APPSTORAGEDIR      webos_appstoragedir      ${WEBOS_INSTALL_CRYPTOFSDIR}/apps)
-	_webos_set_from_env(WEBOS_INSTALL_INSTALLEDAPPSDIR   webos_installedappsdir   ${WEBOS_INSTALL_APPSTORAGEDIR}/usr/palm/applications)
-	_webos_set_from_env(WEBOS_INSTALL_LOCALSTORAGEDIR    webos_localstoragedir    ${WEBOS_INSTALL_MEDIADIR}/internal)
-	_webos_set_from_env(WEBOS_INSTALL_FILECACHEDIR       webos_filecachedir       ${WEBOS_INSTALL_LOCALSTATEDIR}/file-cache)
+
+	#
+	# OE variables for webOS additions to the filesystem hierarchy
+	#
+
+	# Eventually, these will be moved to somewhere else:
+	_webos_set_from_env(WEBOS_INSTALL_WEBOS_PREFIX              webos_prefix                    ${WEBOS_INSTALL_PREFIX}/palm)
+	_webos_set_from_env(WEBOS_INSTALL_WEBOS_LOCALSTATEDIR       webos_localstatedir             ${WEBOS_INSTALL_LOCALSTATEDIR}/palm)
+	_webos_set_from_env(WEBOS_INSTALL_WEBOS_SYSCONFDIR          webos_sysconfdir                ${WEBOS_INSTALL_SYSCONFDIR}/palm)
+
+	_webos_set_from_env(WEBOS_INSTALL_WEBOS_ACCTTEMPLATESDIR    webos_accttemplatesdir          ${WEBOS_INSTALL_PREFIX}/palm/public/accounts)
+        # This is the location of webOS applications, both JS and native. There is a
+        # subdirectory tree for each application that is named using its complete name.
+	_webos_set_from_env(WEBOS_INSTALL_WEBOS_APPLICATIONSDIR     webos_applicationsdir           ${WEBOS_INSTALL_PREFIX}/palm/applications)
+	_webos_set_from_env(WEBOS_INSTALL_WEBOS_FRAMEWORKSDIR       webos_frameworksdir             ${WEBOS_INSTALL_PREFIX}/palm/frameworks)
+	_webos_set_from_env(WEBOS_INSTALL_WEBOS_KEYSDIR             webos_keysdir                   ${WEBOS_INSTALL_PREFIX}/palm/data)
+	# This is the location of webOS application plugins. There is a subdirectory for
+	# each application that is named using the final field of its complete name.
+	_webos_set_from_env(WEBOS_INSTALL_WEBOS_PLUGINSDIR          webos_pluginsdir                ${WEBOS_INSTALL_PREFIX}/palm/plugins)
+	# This is the location of the trees for JS services; the files for native (dynamic)
+	# services are located under sbindir, libdir, etc. as if they were Linux daemons.
+	_webos_set_from_env(WEBOS_INSTALL_WEBOS_SERVICESDIR         webos_servicesdir               ${WEBOS_INSTALL_PREFIX}/palm/services)
+	_webos_set_from_env(WEBOS_INSTALL_WEBOS_SOUNDSDIR           webos_soundsdir                 ${WEBOS_INSTALL_PREFIX}/palm/sounds)
+	_webos_set_from_env(WEBOS_INSTALL_WEBOS_SYSMGRDIR           webos_sysmgrdir                 ${WEBOS_INSTALL_PREFIX}/palm/sysmgr)
+
+	_webos_set_from_env(WEBOS_INSTALL_DB8DATADIR                webos_db8datadir                ${WEBOS_INSTALL_LOCALSTATEDIR}/db)
+	_webos_set_from_env(WEBOS_INSTALL_FILECACHEDIR              webos_filecachedir              ${WEBOS_INSTALL_LOCALSTATEDIR}/file-cache)
+	_webos_set_from_env(WEBOS_INSTALL_PREFERENCESDIR            webos_preferencesdir            ${WEBOS_INSTALL_LOCALSTATEDIR}/preferences)
+
 	_webos_set_from_env(WEBOS_INSTALL_SYSBUS_PUBSERVICESDIR     webos_sysbus_pubservicesdir     ${WEBOS_INSTALL_DATADIR}/dbus-1/services)
 	_webos_set_from_env(WEBOS_INSTALL_SYSBUS_PRVSERVICESDIR     webos_sysbus_prvservicesdir     ${WEBOS_INSTALL_DATADIR}/dbus-1/system-services)
 	_webos_set_from_env(WEBOS_INSTALL_SYSBUS_PUBROLESDIR        webos_sysbus_pubrolesdir        ${WEBOS_INSTALL_DATADIR}/ls2/roles/pub)
@@ -341,18 +378,38 @@ macro(_webos_init_install_vars)
 	_webos_set_from_env(WEBOS_INSTALL_SYSBUS_DYNPRVSERVICESDIR  webos_sysbus_dynprvservicesdir  ${WEBOS_INSTALL_LOCALSTATEDIR}/palm/ls2/services/prv)
 	_webos_set_from_env(WEBOS_INSTALL_SYSBUS_DYNPUBROLESDIR     webos_sysbus_dynpubrolesdir     ${WEBOS_INSTALL_LOCALSTATEDIR}/palm/ls2/roles/pub)
 	_webos_set_from_env(WEBOS_INSTALL_SYSBUS_DYNPRVROLESDIR     webos_sysbus_dynprvrolesdir     ${WEBOS_INSTALL_LOCALSTATEDIR}/palm/ls2/roles/prv)
-	# Eventually, these will be moved to somewhere else:
-	_webos_set_from_env(WEBOS_INSTALL_WEBOS_PREFIX              webos_prefix                    ${WEBOS_INSTALL_PREFIX}/palm)
-	_webos_set_from_env(WEBOS_INSTALL_WEBOS_ACCTTEMPLATESDIR    webos_accttemplatesdir          ${WEBOS_INSTALL_PREFIX}/palm/public/accounts)
-	_webos_set_from_env(WEBOS_INSTALL_WEBOS_APPLICATIONSDIR     webos_applicationsdir           ${WEBOS_INSTALL_PREFIX}/palm/applications)
-	_webos_set_from_env(WEBOS_INSTALL_WEBOS_FRAMEWORKSDIR       webos_frameworksdir             ${WEBOS_INSTALL_PREFIX}/palm/frameworks)
-	_webos_set_from_env(WEBOS_INSTALL_WEBOS_KEYSDIR             webos_keysdir                   ${WEBOS_INSTALL_PREFIX}/palm/data)
-	_webos_set_from_env(WEBOS_INSTALL_WEBOS_SERVICESDIR         webos_servicesdir               ${WEBOS_INSTALL_PREFIX}/palm/services)
-	_webos_set_from_env(WEBOS_INSTALL_WEBOS_SOUNDSDIR           webos_soundsdir                 ${WEBOS_INSTALL_PREFIX}/palm/sounds)
-	_webos_set_from_env(WEBOS_INSTALL_WEBOS_SYSCONFDIR          webos_sysconfdir                ${WEBOS_INSTALL_SYSCONFDIR}/palm)
-	_webos_set_from_env(WEBOS_INSTALL_WEBOS_LOCALSTATEDIR       webos_localstatedir             ${WEBOS_INSTALL_LOCALSTATEDIR}/palm)
+
 	_webos_set_from_env(WEBOS_INSTALL_SYSMGR_DATADIR            webos_sysmgr_datadir            ${WEBOS_INSTALL_LIBDIR}/luna)
 	_webos_set_from_env(WEBOS_INSTALL_SYSMGR_LOCALSTATEDIR      webos_sysmgr_localstatedir      ${WEBOS_INSTALL_LOCALSTATEDIR}/luna)
+
+	_webos_set_from_env(WEBOS_INSTALL_CRYPTOFSDIR               webos_cryptofsdir               ${WEBOS_INSTALL_MEDIADIR}/cryptofs)
+	_webos_set_from_env(WEBOS_INSTALL_BROWSERSTORAGEDIR         webos_browserstoragedir         ${WEBOS_INSTALL_CRYPTOFSDIR}/.browser)
+
+
+	# This is the tree for components downloaded from the app catalog; everything
+	# under this tree persists across software updates.
+	_webos_set_from_env(WEBOS_INSTALL_DOWNLOADEDDIR             webos_downloadeddir             ${WEBOS_INSTALL_CRYPTOFSDIR}/apps)
+	# Deprecated name for WEBOS_INSTALL_DOWNLOADEDDIR
+	_webos_set_from_env(WEBOS_INSTALL_APPSTORAGEDIR             webos_downloadeddir             ${WEBOS_INSTALL_DOWNLOADEDDIR})
+	_webos_set_from_env(WEBOS_INSTALL_DOWNLOADED_APPLICATIONSDIR webos_downloaded_applicationsdir ${WEBOS_INSTALL_DOWNLOADEDDIR}/usr/palm/applications)
+	# Deprecated name for WEBOS_INSTALL_DOWNLOADED_APPLICATIONSDIR
+	_webos_set_from_env(WEBOS_INSTALL_INSTALLEDAPPSDIR         webos_downloaded_applicationsdir ${WEBOS_INSTALL_DOWNLOADED_APPLICATIONSDIR})
+	_webos_set_from_env(WEBOS_INSTALL_DOWNLOADED_FRAMEWORKSDIR  webos_downloaded_frameworksdir  ${WEBOS_INSTALL_DOWNLOADEDDIR}/usr/palm/frameworks)
+	_webos_set_from_env(WEBOS_INSTALL_DOWNLOADED_PLUGINSDIR     webos_downloaded_pluginsdir     ${WEBOS_INSTALL_DOWNLOADEDDIR}/usr/palm/plugins)
+	_webos_set_from_env(WEBOS_INSTALL_DOWNLOADED_SERVICESDIR    webos_downloaded_servicesdir    ${WEBOS_INSTALL_DOWNLOADEDDIR}/usr/palm/services)
+
+	# The FHS specs for WEBOS_INSTALL_EXECSTATEDIR apply to this location with the additional
+	# constraint that everything under this tree persists across software updates.
+	# Note that this is not the case for anything under WEBOS_INSTALL_LOCALSTATEDIR, including
+	# even the existence of the standard directory names.
+	_webos_set_from_env(WEBOS_INSTALL_PRESISTENTSTORAGEDIR      webos_persistentstoragedir      ${WEBOS_INSTALL_CRYPTOFSDIR}/data)
+
+	# On devices that support it, this tree is externally mountable as (USB) mass
+	# storage. Applications that want their data to be visible in this manner should
+	# store them here instead of under WEBOS_INSTALL_PRESISTENTSTORAGEDIR.
+	_webos_set_from_env(WEBOS_INSTALL_MOUNTABLESTORAGEDIR       webos_mountablestoragedir       ${WEBOS_INSTALL_MEDIADIR}/internal)
+	# Deprecated name for WEBOS_INSTALL_MOUNTABLESTORAGEDIR
+	_webos_set_from_env(WEBOS_INSTALL_LOCALSTORAGEDIR           webos_mountablestoragedir       ${WEBOS_INSTALL_MOUNTABLESTORAGEDIR})
 endmacro()
 
 
