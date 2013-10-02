@@ -407,7 +407,7 @@ macro(_webos_init_install_vars)
 	# constraint that everything under this tree persists across software updates.
 	# Note that this is not the case for anything under WEBOS_INSTALL_LOCALSTATEDIR, including
 	# even the existence of the standard directory names.
-	_webos_set_from_env(WEBOS_INSTALL_PRESISTENTSTORAGEDIR      webos_persistentstoragedir      ${WEBOS_INSTALL_CRYPTOFSDIR}/data)
+	_webos_set_from_env(WEBOS_INSTALL_PERSISTENTSTORAGEDIR      webos_persistentstoragedir      ${WEBOS_INSTALL_CRYPTOFSDIR}/data)
 
 	# On devices that support it, this tree is externally mountable as (USB) mass
 	# storage. Applications that want their data to be visible in this manner should
