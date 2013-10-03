@@ -5,13 +5,13 @@
 #
 # Usage:
 #  include(webOS/webOS)
-#  webos_modules_init(1 0 0 QUALIFIER RC5)
+#  webos_modules_init(1 0 0 QUALIFIER RC6)
 #
 # Detailed documentation for the latest version is available from:
 # https://github.com/openwebos/cmake-modules-webos/blob/master/REFERENCE.md
 #
 # @@@VERSION
-# 1.0.0 RC5
+# 1.0.0 RC6
 # VERSION@@@
 #
 
@@ -383,6 +383,10 @@ macro(_webos_init_install_vars)
 	_webos_set_from_env(WEBOS_INSTALL_SYSBUS_DYNPRVSERVICESDIR  webos_sysbus_dynprvservicesdir  ${WEBOS_INSTALL_LOCALSTATEDIR}/palm/ls2/services/prv)
 	_webos_set_from_env(WEBOS_INSTALL_SYSBUS_DYNPUBROLESDIR     webos_sysbus_dynpubrolesdir     ${WEBOS_INSTALL_LOCALSTATEDIR}/palm/ls2/roles/pub)
 	_webos_set_from_env(WEBOS_INSTALL_SYSBUS_DYNPRVROLESDIR     webos_sysbus_dynprvrolesdir     ${WEBOS_INSTALL_LOCALSTATEDIR}/palm/ls2/roles/prv)
+	_webos_set_from_env(WEBOS_INSTALL_SYSBUS_DEVPUBSERVICESDIR  webos_sysbus_devpubservicesdir  ${WEBOS_INSTALL_LOCALSTATEDIR}/palm/ls2-dev/services/pub)
+	_webos_set_from_env(WEBOS_INSTALL_SYSBUS_DEVPRVSERVICESDIR  webos_sysbus_devprvservicesdir  ${WEBOS_INSTALL_LOCALSTATEDIR}/palm/ls2-dev/services/prv)
+	_webos_set_from_env(WEBOS_INSTALL_SYSBUS_DEVPUBROLESDIR     webos_sysbus_devpubrolesdir     ${WEBOS_INSTALL_LOCALSTATEDIR}/palm/ls2-dev/roles/pub)
+	_webos_set_from_env(WEBOS_INSTALL_SYSBUS_DEVPRVROLESDIR     webos_sysbus_devprvrolesdir     ${WEBOS_INSTALL_LOCALSTATEDIR}/palm/ls2-dev/roles/prv)
 
 	_webos_set_from_env(WEBOS_INSTALL_SYSMGR_DATADIR            webos_sysmgr_datadir            ${WEBOS_INSTALL_LIBDIR}/luna)
 	_webos_set_from_env(WEBOS_INSTALL_SYSMGR_LOCALSTATEDIR      webos_sysmgr_localstatedir      ${WEBOS_INSTALL_LOCALSTATEDIR}/luna)

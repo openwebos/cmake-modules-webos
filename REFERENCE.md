@@ -61,7 +61,7 @@ The first five (executable) lines of your top level `CMakeLists.txt` script
 	project(<name> <lang> [<lang> ...])
 
 	include(webOS/webOS)
-	webos_modules_init(1 0 0 QUALIFIER RC5)
+	webos_modules_init(1 0 0 QUALIFIER RC6)
 	webos_component(<major> <minor> <patch> \[QUALIFIER <value>>])
 
 In order, these lines: specify the version of Cmake that you are using to write
