@@ -1,7 +1,7 @@
 # - Common CMake code for all Open webOS components
 #
 # Any Open webOS component whose root CMakeLists.txt is written by us must
-# include() this module. 
+# include() this module.
 #
 # Usage:
 #  include(webOS/webOS)
@@ -11,7 +11,7 @@
 # https://github.com/openwebos/cmake-modules-webos/blob/master/REFERENCE.md
 #
 # @@@VERSION
-# 1.0.0 RC6
+# 1.0.0 RC7
 # VERSION@@@
 #
 
@@ -393,7 +393,6 @@ macro(_webos_init_install_vars)
 	_webos_set_from_env(WEBOS_INSTALL_CRYPTOFSDIR               webos_cryptofsdir               ${WEBOS_INSTALL_MEDIADIR}/cryptofs)
 	_webos_set_from_env(WEBOS_INSTALL_BROWSERSTORAGEDIR         webos_browserstoragedir         ${WEBOS_INSTALL_CRYPTOFSDIR}/.browser)
 
-
 	# This is the tree for components downloaded from the app catalog; everything
 	# under this tree persists across software updates.
 	_webos_set_from_env(WEBOS_INSTALL_DOWNLOADEDDIR             webos_downloadeddir             ${WEBOS_INSTALL_CRYPTOFSDIR}/apps)
@@ -412,12 +411,18 @@ macro(_webos_init_install_vars)
 	# even the existence of the standard directory names.
 	_webos_set_from_env(WEBOS_INSTALL_PERSISTENTSTORAGEDIR      webos_persistentstoragedir      ${WEBOS_INSTALL_CRYPTOFSDIR}/data)
 
+	# db8 database use this directory to store mediadb database.
+	# mediadb database store results of fileindexer and contain information
+	# about media files. Potentially this db can be big
+	_webos_set_from_env(WEBOS_INSTALL_DB8MEDIADIR               webos_db8mediadir               ${WEBOS_INSTALL_PERSISTENTSTORAGEDIR}/db8/mediadb)
+
 	# On devices that support it, this tree is externally mountable as (USB) mass
 	# storage. Applications that want their data to be visible in this manner should
 	# store them here instead of under WEBOS_INSTALL_PRESISTENTSTORAGEDIR.
 	_webos_set_from_env(WEBOS_INSTALL_MOUNTABLESTORAGEDIR       webos_mountablestoragedir       ${WEBOS_INSTALL_MEDIADIR}/internal)
 	# Deprecated name for WEBOS_INSTALL_MOUNTABLESTORAGEDIR
 	_webos_set_from_env(WEBOS_INSTALL_LOCALSTORAGEDIR           webos_mountablestoragedir       ${WEBOS_INSTALL_MOUNTABLESTORAGEDIR})
+
 endmacro()
 
 
